@@ -23,13 +23,11 @@ curl_setopt($ch, CURLOPT_HTTPHEADER, (function () use ($target) {
     }
     return array_map(function ($k, $v) { return "$k: $v"; }, array_keys($headers), array_values($headers));
 })());
-if (in_array($_SERVER['REQUEST_METHOD'], ['POST', 'PUT', 'PATCH'])) {
-    if ($_SERVER['REQUEST_METHOD'] == 'POST' && !empty($_FILES)) {
-        $files = array_map(function ($v) { return curl_file_create($v['tmp_name'], $v['type'], $v['name']); }, $_FILES);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, array_merge($_POST, $files));
-    } else {
-        curl_setopt($ch, CURLOPT_POSTFIELDS, file_get_contents('php://input'));
-    }
+if (!empty($_FILES)) {
+    $files = array_map(function ($v) { return curl_file_create($v['tmp_name'], $v['type'], $v['name']); }, $_FILES);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, array_merge($_POST, $files));
+} elseif (in_array($_SERVER['REQUEST_METHOD'], ['POST', 'PUT', 'PATCH'])) {
+    curl_setopt($ch, CURLOPT_POSTFIELDS, file_get_contents('php://input'));
 }
 
 $result = curl_exec($ch);
