@@ -43,6 +43,9 @@ curl_close($ch);
 
 [$header, $body] = explode("\r\n\r\n", $result, 2);
 foreach (explode("\r\n", $header) as $h) {
+    if (preg_match('/^Transfer-Encoding:/', $h)) {
+        continue;
+    }
     header($h);
 }
 echo $body;
